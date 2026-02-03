@@ -1,14 +1,37 @@
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-export const TopBar = () => {
+interface TopBarProps {
+  sidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+export const TopBar = ({ sidebarOpen, onToggleSidebar }: TopBarProps) => {
   const { theme, toggleTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   return (
-    <header className="h-[52px] border-b border-border flex items-center justify-between px-5 bg-topbar-bg z-50">
-      <a href="/" className="font-semibold text-sm text-foreground no-underline">
-        lohith srikar
-      </a>
+    <header className="h-[52px] border-b border-border flex items-center justify-between px-4 md:px-5 bg-topbar-bg z-50">
+      <div className="flex items-center gap-3">
+        {/* Mobile menu toggle */}
+        {isMobile && onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-hover-bg transition-colors"
+            title={sidebarOpen ? "Close menu" : "Open menu"}
+          >
+            {sidebarOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
+        )}
+        <a href="/" className="font-semibold text-sm text-foreground no-underline">
+          lohith srikar
+        </a>
+      </div>
 
       <div className="flex items-center gap-4">
         <button

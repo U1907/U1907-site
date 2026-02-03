@@ -7,9 +7,11 @@ interface SidebarProps {
   posts: BlogPost[];
   activePostId: string;
   onSelectPost: (postId: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar = ({ posts, activePostId, onSelectPost }: SidebarProps) => {
+export const Sidebar = ({ posts, activePostId, onSelectPost, isOpen = true }: SidebarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredPosts = posts.filter((post) =>
@@ -26,7 +28,15 @@ export const Sidebar = ({ posts, activePostId, onSelectPost }: SidebarProps) => 
   }, {} as Record<string, BlogPost[]>);
 
   return (
-    <aside className="w-[260px] border-r border-border p-4 bg-sidebar-bg flex flex-col shrink-0">
+    <aside
+      className={cn(
+        "w-[260px] border-r border-border p-4 bg-sidebar-bg flex flex-col shrink-0 transition-all duration-300 ease-in-out",
+        // Mobile styles
+        "fixed md:relative inset-y-0 left-0 z-40 md:z-auto",
+        "md:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:p-0 md:border-0 md:overflow-hidden"
+      )}
+    >
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-[10px] top-1/2 -translate-y-1/2 w-[14px] h-[14px] text-muted-foreground" />

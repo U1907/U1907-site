@@ -1,0 +1,227 @@
+import type { BlogPost, ContentBlock } from "@/data/blogPosts";
+
+interface FrontMatter {
+  id: string;
+  title: string;
+  category: string;
+  date?: string;
+}
+
+/**
+ * Parse frontmatter from markdown content
+ */
+function parseFrontMatter(content: string): { frontMatter: FrontMatter; body: string } {
+  const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+  const match = content.match(frontMatterRegex);
+
+  if (!match) {
+    throw new Error("Invalid markdown: missing frontmatter");
+  }
+
+  const frontMatterLines = match[1].split("\n");
+  const frontMatter: Record<string, string> = {};
+
+  for (const line of frontMatterLines) {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex !== -1) {
+      const key = line.slice(0, colonIndex).trim();
+      const value = line.slice(colonIndex + 1).trim();
+      frontMatter[key] = value;
+    }
+  }
+
+  return {
+    frontMatter: frontMatter as unknown as FrontMatter,
+    body: match[2].trim(),
+  };
+}
+
+/**
+ * Parse markdown body into content blocks
+ */
+function parseMarkdownToBlocks(markdown: string): ContentBlock[] {
+  const blocks: ContentBlock[] = [];
+  const lines = markdown.split("\n");
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Skip empty lines
+    if (line.trim() === "") {
+      i++;
+      continue;
+    }
+
+    // Code block
+    if (line.startsWith("```")) {
+      const language = line.slice(3).trim() || "text";
+      const codeLines: string[] = [];
+      let filename: string | undefined;
+
+      i++;
+      while (i < lines.length && !lines[i].startsWith("```")) {
+        const codeLine = lines[i];
+        // Check for filename comment
+        if (codeLines.length === 0 && codeLine.match(/^(#|\/\/)\s*filename:\s*/)) {
+          filename = codeLine.replace(/^(#|\/\/)\s*filename:\s*/, "").trim();
+        } else {
+          codeLines.push(codeLine);
+        }
+        i++;
+      }
+      i++; // Skip closing ```
+
+      blocks.push({
+        type: "code",
+        language,
+        filename,
+        content: codeLines.join("\n"),
+      });
+      continue;
+    }
+
+    // Heading
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length as 1 | 2 | 3;
+      blocks.push({
+        type: "heading",
+        level,
+        content: headingMatch[2],
+      });
+      i++;
+      continue;
+    }
+
+    // Blockquote
+    if (line.startsWith("> ")) {
+      const quoteLines: string[] = [];
+      while (i < lines.length && lines[i].startsWith("> ")) {
+        quoteLines.push(lines[i].slice(2));
+        i++;
+      }
+      blocks.push({
+        type: "blockquote",
+        content: quoteLines.join(" "),
+      });
+      continue;
+    }
+
+    // Ordered list
+    if (line.match(/^\d+\.\s/)) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].match(/^\d+\.\s/)) {
+        items.push(lines[i].replace(/^\d+\.\s/, ""));
+        i++;
+      }
+      blocks.push({
+        type: "ordered-list",
+        items,
+      });
+      continue;
+    }
+
+    // Unordered list
+    if (line.match(/^[-*]\s/)) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].match(/^[-*]\s/)) {
+        items.push(lines[i].replace(/^[-*]\s/, ""));
+        i++;
+      }
+      blocks.push({
+        type: "list",
+        items,
+      });
+      continue;
+    }
+
+    // Horizontal rule
+    if (line.match(/^---+$/) || line.match(/^\*\*\*+$/)) {
+      blocks.push({ type: "divider" });
+      i++;
+      continue;
+    }
+
+    // Paragraph (collect consecutive non-empty lines)
+    const paragraphLines: string[] = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() !== "" &&
+      !lines[i].startsWith("#") &&
+      !lines[i].startsWith("```") &&
+      !lines[i].startsWith("> ") &&
+      !lines[i].match(/^[-*]\s/) &&
+      !lines[i].match(/^\d+\.\s/) &&
+      !lines[i].match(/^---+$/)
+    ) {
+      paragraphLines.push(lines[i]);
+      i++;
+    }
+
+    if (paragraphLines.length > 0) {
+      const content = paragraphLines.join(" ");
+      // Check if content has inline code
+      if (content.includes("`")) {
+        blocks.push({
+          type: "inline-code",
+          content,
+        });
+      } else {
+        blocks.push({
+          type: "paragraph",
+          content,
+        });
+      }
+    }
+  }
+
+  return blocks;
+}
+
+/**
+ * Parse a complete markdown file into a BlogPost
+ */
+export function parseMarkdown(content: string): BlogPost {
+  const { frontMatter, body } = parseFrontMatter(content);
+  const contentBlocks = parseMarkdownToBlocks(body);
+
+  return {
+    id: frontMatter.id,
+    title: frontMatter.title,
+    category: frontMatter.category,
+    date: frontMatter.date,
+    content: contentBlocks,
+  };
+}
+
+/**
+ * Load all markdown posts from the content directory
+ * This uses Vite's glob import feature
+ */
+export async function loadMarkdownPosts(): Promise<BlogPost[]> {
+  const postModules = import.meta.glob("/src/content/posts/*.md", {
+    query: "?raw",
+    import: "default",
+  });
+
+  const posts: BlogPost[] = [];
+
+  for (const path in postModules) {
+    try {
+      const content = (await postModules[path]()) as string;
+      const post = parseMarkdown(content);
+      posts.push(post);
+    } catch (error) {
+      console.error(`Error loading post from ${path}:`, error);
+    }
+  }
+
+  // Sort by date (newest first)
+  posts.sort((a, b) => {
+    if (!a.date || !b.date) return 0;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  return posts;
+}
