@@ -36,9 +36,9 @@ const HomePage = () => {
               Lohith Srikar
             </h1>
             <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-4">
-              Researcher exploring the intersection of machine learning, reinforcement learning, 
-              and neural architectures. Currently focused on transformer models and their applications 
-              in complex reasoning tasks.
+              I spend most of my time homelabbing and tinkering with self-hosted stuff. 
+              I automate pretty much everything I can. 
+              Lately, I've been getting into malware analysis — it's weirdly fun.
             </p>
             <p className="text-muted-foreground text-sm">
               Automation Practitioner · Systems Thinker · 
@@ -52,7 +52,7 @@ const HomePage = () => {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Recent Papers
+                Recent Writings
               </h2>
               <Link 
                 to="/blog" 
@@ -67,8 +67,12 @@ const HomePage = () => {
               <div className="text-muted-foreground text-sm">Loading...</div>
             ) : (
               <ul className="space-y-1">
-                {recentPosts.map((post) => (
-                  <li key={post.id}>
+                {recentPosts.map((post, index) => (
+                  <li 
+                    key={post.id}
+                    className="animate-fade-in opacity-0"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
                     <Link
                       to={`/blog/${post.id}`}
                       className="group flex items-baseline justify-between py-3 border-b border-border hover:border-muted-foreground/30 transition-colors"

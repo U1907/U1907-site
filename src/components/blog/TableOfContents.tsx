@@ -26,29 +26,44 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
     }));
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: "-80px 0px -80% 0px",
-        threshold: 0,
-      }
-    );
+    // Find the scrollable container (main element)
+    const scrollContainer = document.querySelector("main");
+    if (!scrollContainer) return;
 
-    // Observe all heading elements
-    headings.forEach(({ id }) => {
-      const element = document.getElementById(id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
+    const handleScroll = () => {
+      const headingElements = headings
+        .map(({ id }) => ({ id, element: document.getElementById(id) }))
+        .filter((item): item is { id: string; element: HTMLElement } => item.element !== null);
 
-    return () => observer.disconnect();
+      if (headingElements.length === 0) return;
+
+      // Check if scrolled to bottom
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+      if (isAtBottom) {
+        setActiveId(headings[headings.length - 1].id);
+        return;
+      }
+
+      // Find active heading based on viewport position
+      let activeHeadingId = headingElements[0].id;
+      
+      for (const { id, element } of headingElements) {
+        const rect = element.getBoundingClientRect();
+        if (rect.top <= 160) {
+          activeHeadingId = id;
+        }
+      }
+
+      setActiveId(activeHeadingId);
+    };
+
+    // Initial check
+    handleScroll();
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [headings]);
 
   const handleClick = (id: string) => {
@@ -63,8 +78,8 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
   }
 
   return (
-    <nav className="hidden lg:block w-[180px] xl:w-[200px] shrink-0">
-      <div className="sticky top-[100px]">
+    <nav className="hidden xl:block fixed top-[140px] right-8 2xl:right-12 w-[200px]">
+      <div>
         <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 animate-fade-in">
           <Menu className="w-3.5 h-3.5" />
           <span>On This Page</span>
@@ -81,6 +96,7 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
                 className={cn(
                   "block w-full text-left text-[13px] py-1.5 border-l-2 -ml-px",
                   "transition-all duration-200 ease-out",
+                  "truncate",
                   heading.level === 1 && "pl-4",
                   heading.level === 2 && "pl-4",
                   heading.level === 3 && "pl-7",
@@ -88,6 +104,7 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
                     ? "border-foreground text-foreground font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50"
                 )}
+                title={heading.text}
               >
                 {heading.text}
               </button>

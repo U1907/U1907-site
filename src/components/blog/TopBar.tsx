@@ -36,7 +36,7 @@ export const TopBar = ({ sidebarOpen, onToggleSidebar, showMenuButton = true }: 
 
       <div className="flex items-center gap-4">
         <button
-          onClick={toggleTheme}
+          onClick={(e) => toggleTheme(e)}
           className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-hover-bg transition-colors"
           title="Toggle Light/Dark"
         >
@@ -48,7 +48,7 @@ export const TopBar = ({ sidebarOpen, onToggleSidebar, showMenuButton = true }: 
         </button>
 
         <a
-          href="https://github.com"
+          href="https://github.com/zndx-sh/zndx-blog"
           target="_blank"
           rel="noopener noreferrer"
           className="text-muted-foreground hover:text-foreground transition-colors flex"

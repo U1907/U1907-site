@@ -37,31 +37,24 @@ export const CodeBlock = ({ code, language = "typescript", filename }: CodeBlock
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const displayLang = language === "tsx" ? "TypeScript (React)" : 
-                      language === "jsx" ? "JavaScript (React)" :
-                      language.charAt(0).toUpperCase() + language.slice(1);
-
   return (
     <div className="code-block">
       <div className="code-block-header">
-        <span>{filename || displayLang}</span>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-          title="Copy code"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5" />
-              <span>Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy</span>
-            </>
-          )}
-        </button>
+        {filename && <span className="code-filename">{filename}</span>}
+        <div className="code-block-actions">
+          <span className="code-lang">{language}</span>
+          <button
+            onClick={handleCopy}
+            className="copy-btn"
+            title="Copy code"
+          >
+            {copied ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
       <pre>
         <code ref={codeRef} className={`language-${language}`}>

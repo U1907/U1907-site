@@ -143,6 +143,53 @@ function parseMarkdownToBlocks(markdown: string): ContentBlock[] {
       continue;
     }
 
+    // Table (starts with |)
+    if (line.startsWith("|") && line.endsWith("|")) {
+      const tableLines: string[] = [];
+      while (i < lines.length && lines[i].startsWith("|") && lines[i].endsWith("|")) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+
+      if (tableLines.length >= 2) {
+        // Parse header row
+        const headerLine = tableLines[0];
+        const headers = headerLine
+          .slice(1, -1)
+          .split("|")
+          .map((cell) => cell.trim());
+
+        // Skip separator row (index 1) and parse data rows
+        const rows: string[][] = [];
+        for (let r = 2; r < tableLines.length; r++) {
+          const rowCells = tableLines[r]
+            .slice(1, -1)
+            .split("|")
+            .map((cell) => cell.trim());
+          rows.push(rowCells);
+        }
+
+        blocks.push({
+          type: "table",
+          tableHeaders: headers,
+          tableRows: rows,
+        });
+      }
+      continue;
+    }
+
+    // Image
+    const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imageMatch) {
+      blocks.push({
+        type: "image",
+        alt: imageMatch[1],
+        content: imageMatch[2],
+      });
+      i++;
+      continue;
+    }
+
     // Paragraph (collect consecutive non-empty lines)
     const paragraphLines: string[] = [];
     while (
@@ -153,7 +200,9 @@ function parseMarkdownToBlocks(markdown: string): ContentBlock[] {
       !lines[i].startsWith("> ") &&
       !lines[i].match(/^[-*]\s/) &&
       !lines[i].match(/^\d+\.\s/) &&
-      !lines[i].match(/^---+$/)
+      !lines[i].match(/^---+$/) &&
+      !lines[i].match(/^!\[.*\]\(.*\)$/) &&
+      !(lines[i].startsWith("|") && lines[i].endsWith("|"))
     ) {
       paragraphLines.push(lines[i]);
       i++;
