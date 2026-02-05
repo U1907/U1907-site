@@ -1,5 +1,5 @@
 export interface ContentBlock {
-  type: "paragraph" | "heading" | "code" | "list" | "ordered-list" | "blockquote" | "divider" | "inline-code" | "image" | "table";
+  type: "paragraph" | "heading" | "code" | "list" | "ordered-list" | "blockquote" | "divider" | "inline-code" | "image" | "table" | "callout";
   content?: string;
   level?: 1 | 2 | 3;
   language?: string;
@@ -8,6 +8,8 @@ export interface ContentBlock {
   alt?: string;
   tableHeaders?: string[];
   tableRows?: string[][];
+  calloutVariant?: "note" | "tip" | "warning" | "question";
+  calloutTitle?: string;
 }
 
 export interface BlogPost {

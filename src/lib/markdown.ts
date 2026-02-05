@@ -190,6 +190,29 @@ function parseMarkdownToBlocks(markdown: string): ContentBlock[] {
       continue;
     }
 
+    // Callout block (:::note, :::tip, :::warning, :::question)
+    const calloutMatch = line.match(/^:::(note|tip|warning|question)\s*(.*)$/);
+    if (calloutMatch) {
+      const variant = calloutMatch[1] as "note" | "tip" | "warning" | "question";
+      const title = calloutMatch[2].trim() || variant.charAt(0).toUpperCase() + variant.slice(1);
+      const contentLines: string[] = [];
+      
+      i++;
+      while (i < lines.length && !lines[i].startsWith(":::")) {
+        contentLines.push(lines[i]);
+        i++;
+      }
+      i++; // Skip closing :::
+      
+      blocks.push({
+        type: "callout",
+        calloutVariant: variant,
+        calloutTitle: title,
+        content: contentLines.join("\n").trim(),
+      });
+      continue;
+    }
+
     // Paragraph (collect consecutive non-empty lines)
     const paragraphLines: string[] = [];
     while (

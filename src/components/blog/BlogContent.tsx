@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ImagePreview } from "./ImagePreview";
 import { LazyImage } from "./LazyImage";
 import { cn } from "@/lib/utils";
+import { Callout } from "./Callout";
 
 interface BlogContentProps {
   post: BlogPost;
@@ -121,6 +122,17 @@ export const BlogContent = ({ post }: BlogContentProps) => {
               </tbody>
             </table>
           </div>
+        );
+      
+      case "callout":
+        return (
+          <Callout
+            key={index}
+            variant={block.calloutVariant || "note"}
+            title={block.calloutTitle || "Note"}
+          >
+            {block.content}
+          </Callout>
         );
       
       default:
