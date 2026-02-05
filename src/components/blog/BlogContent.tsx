@@ -6,6 +6,8 @@ import { ImagePreview } from "./ImagePreview";
 import { LazyImage } from "./LazyImage";
 import { cn } from "@/lib/utils";
 import { Callout } from "./Callout";
+import { GiscusComments } from "./GiscusComments";
+import { TagList } from "./TagBadge";
 
 interface BlogContentProps {
   post: BlogPost;
@@ -142,16 +144,27 @@ export const BlogContent = ({ post }: BlogContentProps) => {
 
   return (
     <>
-      <main className="flex-1 py-8 md:py-[60px] px-4 sm:px-6 md:px-8 overflow-y-auto overflow-x-hidden bg-background">
+      <main className="flex-1 py-8 md:py-[60px] px-4 sm:px-6 md:px-10 md:pl-12 overflow-y-auto overflow-x-hidden bg-background">
         <div className="w-full max-w-[1100px] mx-auto flex flex-col lg:flex-row lg:gap-12 xl:gap-16">
           <article key={post.id} className="w-full lg:max-w-[700px] blog-prose min-w-0 lg:flex-1 animate-fade-in-up">
             <h1>{post.title}</h1>
-            {post.date && (
-              <p className="text-muted-foreground text-sm mb-6 mt-[-16px]">
-                {post.date}
-              </p>
-            )}
+            <div className="flex flex-wrap items-center gap-3 mb-6 mt-[-16px]">
+              {post.date && (
+                <span className="text-muted-foreground text-sm">
+                  {post.date}
+                </span>
+              )}
+              {post.tags && post.tags.length > 0 && (
+                <>
+                  {post.date && <span className="text-muted-foreground/50">·</span>}
+                  <TagList tags={post.tags} size="sm" linkToTagPage />
+                </>
+              )}
+            </div>
             {post.content.map((block, index) => renderContentBlock(block, index))}
+            
+            {/* Giscus Comments Section */}
+            <GiscusComments />
           </article>
         </div>
       </main>

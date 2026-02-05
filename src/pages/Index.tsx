@@ -59,7 +59,7 @@ const Index = () => {
   if (loading) {
     return (
       <div className="flex flex-col h-screen">
-        <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} showTagsLink />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-muted-foreground">Loading posts...</div>
         </div>
@@ -69,7 +69,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} showTagsLink />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
           posts={posts}

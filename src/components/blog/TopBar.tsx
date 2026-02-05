@@ -1,14 +1,16 @@
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Moon, Sun, Menu, X, Tag } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
 
 interface TopBarProps {
   sidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   showMenuButton?: boolean;
+  showTagsLink?: boolean;
 }
 
-export const TopBar = ({ sidebarOpen, onToggleSidebar, showMenuButton = true }: TopBarProps) => {
+export const TopBar = ({ sidebarOpen, onToggleSidebar, showMenuButton = true, showTagsLink = false }: TopBarProps) => {
   const { theme, toggleTheme } = useTheme();
   const isMobile = useIsMobile();
 
@@ -35,6 +37,19 @@ export const TopBar = ({ sidebarOpen, onToggleSidebar, showMenuButton = true }: 
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Tags link - only shown on blog pages */}
+        {showTagsLink && (
+          <Link
+            to="/tags"
+            className="group flex items-center text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Tag className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            <span className="overflow-hidden w-0 group-hover:w-10 transition-all duration-200 ease-out text-sm whitespace-nowrap">
+              &nbsp;Tags
+            </span>
+          </Link>
+        )}
+
         <button
           onClick={(e) => toggleTheme(e)}
           className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-hover-bg transition-colors"

@@ -5,6 +5,7 @@ interface FrontMatter {
   title: string;
   category: string;
   date?: string;
+  tags?: string;
 }
 
 /**
@@ -258,11 +259,17 @@ export function parseMarkdown(content: string): BlogPost {
   const { frontMatter, body } = parseFrontMatter(content);
   const contentBlocks = parseMarkdownToBlocks(body);
 
+  // Parse tags from comma-separated string to array
+  const tags = frontMatter.tags 
+    ? frontMatter.tags.split(",").map(tag => tag.trim()).filter(Boolean)
+    : undefined;
+
   return {
     id: frontMatter.id,
     title: frontMatter.title,
     category: frontMatter.category,
     date: frontMatter.date,
+    tags,
     content: contentBlocks,
   };
 }

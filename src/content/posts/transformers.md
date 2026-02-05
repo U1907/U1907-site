@@ -3,6 +3,7 @@ id: rl-basics
 title: Reinforcement Learning
 category: Deep Learning
 date: February 1, 2025
+tags: RL, Machine Learning, Q-Learning, AI
 ---
 
 Reinforcement Learning (RL) is a type of machine learning where an agent learns to make decisions by interacting with an environment to maximize cumulative reward.

@@ -3,6 +3,7 @@ id: image-test
 title: Image Preview Test
 category: Testing
 date: Feb 4, 2026
+tags: Testing, Images, Demo
 ---
 
 ## Single Image

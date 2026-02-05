@@ -3,6 +3,7 @@ id: ml
 title: Machine Learning
 category: Guides
 date: January 20, 2025
+tags: Machine Learning, Neural Networks, AI, Python
 ---
 
 Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed. It focuses on developing algorithms that can access data and use it to learn for themselves.

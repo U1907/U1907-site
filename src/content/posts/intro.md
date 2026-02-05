@@ -3,6 +3,7 @@ id: intro
 title: Introduction
 category: Guides
 date: January 15, 2025
+tags: Getting Started, Research
 ---
 
 Research is a systematic inquiry to describe, explain, predict, and control the observed phenomenon. Research involves inductive and deductive methods.

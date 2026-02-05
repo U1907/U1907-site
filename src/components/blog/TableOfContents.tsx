@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ContentBlock } from "@/data/blogPosts";
@@ -25,8 +25,41 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
       level: block.level || 2,
     }));
 
+  // Group headings: h2 as parents with h3 children
+  const groupedHeadings = useMemo(() => {
+    const groups: { parent: TOCItem; children: TOCItem[] }[] = [];
+    let currentGroup: { parent: TOCItem; children: TOCItem[] } | null = null;
+
+    headings.forEach((heading) => {
+      if (heading.level === 2) {
+        if (currentGroup) {
+          groups.push(currentGroup);
+        }
+        currentGroup = { parent: heading, children: [] };
+      } else if (heading.level === 3 && currentGroup) {
+        currentGroup.children.push(heading);
+      }
+    });
+
+    if (currentGroup) {
+      groups.push(currentGroup);
+    }
+
+    return groups;
+  }, [headings]);
+
+  // Find which parent section is active
+  const activeParentId = useMemo(() => {
+    for (const group of groupedHeadings) {
+      if (group.parent.id === activeId) return group.parent.id;
+      for (const child of group.children) {
+        if (child.id === activeId) return group.parent.id;
+      }
+    }
+    return groupedHeadings[0]?.parent.id || "";
+  }, [activeId, groupedHeadings]);
+
   useEffect(() => {
-    // Find the scrollable container (main element)
     const scrollContainer = document.querySelector("main");
     if (!scrollContainer) return;
 
@@ -37,7 +70,6 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
 
       if (headingElements.length === 0) return;
 
-      // Check if scrolled to bottom
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
 
@@ -46,7 +78,6 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
         return;
       }
 
-      // Find active heading based on viewport position
       let activeHeadingId = headingElements[0].id;
       
       for (const { id, element } of headingElements) {
@@ -59,7 +90,6 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
       setActiveId(activeHeadingId);
     };
 
-    // Initial check
     handleScroll();
 
     scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
@@ -85,31 +115,62 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
           <span>On This Page</span>
         </div>
         <ul className="space-y-0.5 border-l border-border">
-          {headings.map((heading, index) => (
-            <li 
-              key={heading.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 60}ms`, animationFillMode: 'both' }}
-            >
-              <button
-                onClick={() => handleClick(heading.id)}
-                className={cn(
-                  "block w-full text-left text-[13px] py-1.5 border-l-2 -ml-px",
-                  "transition-all duration-200 ease-out",
-                  "truncate",
-                  heading.level === 1 && "pl-4",
-                  heading.level === 2 && "pl-4",
-                  heading.level === 3 && "pl-7",
-                  activeId === heading.id
-                    ? "border-foreground text-foreground font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50"
-                )}
-                title={heading.text}
+          {groupedHeadings.map((group, groupIndex) => {
+            const isExpanded = activeParentId === group.parent.id;
+            
+            return (
+              <li 
+                key={group.parent.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${groupIndex * 60}ms`, animationFillMode: 'both' }}
               >
-                {heading.text}
-              </button>
-            </li>
-          ))}
+                {/* Parent heading (h2) */}
+                <button
+                  onClick={() => handleClick(group.parent.id)}
+                  className={cn(
+                    "block w-full text-left text-[13px] py-1.5 pl-4 border-l-2 -ml-px",
+                    "transition-all duration-200 ease-out",
+                    "truncate",
+                    activeId === group.parent.id
+                      ? "border-foreground text-foreground font-medium"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50"
+                  )}
+                  title={group.parent.text}
+                >
+                  {group.parent.text}
+                </button>
+
+                {/* Child headings (h3) - only show when section is active */}
+                {group.children.length > 0 && (
+                  <ul
+                    className={cn(
+                      "overflow-hidden transition-all duration-300 ease-out",
+                      isExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                    )}
+                  >
+                    {group.children.map((child) => (
+                      <li key={child.id}>
+                        <button
+                          onClick={() => handleClick(child.id)}
+                          className={cn(
+                            "block w-full text-left text-[12.5px] py-1 pl-7 border-l-2 -ml-px",
+                            "transition-all duration-200 ease-out",
+                            "truncate",
+                            activeId === child.id
+                              ? "border-foreground text-foreground font-medium"
+                              : "border-transparent text-muted-foreground/80 hover:text-foreground hover:border-muted-foreground/50"
+                          )}
+                          title={child.text}
+                        >
+                          {child.text}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </nav>

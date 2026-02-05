@@ -3,6 +3,7 @@ id: transformers
 title: Transformers
 category: Deep Learning
 date: January 25, 2025
+tags: Transformers, NLP, Deep Learning, Attention
 ---
 
 The Transformer architecture, introduced in the paper "Attention Is All You Need", has revolutionized natural language processing and beyond.
