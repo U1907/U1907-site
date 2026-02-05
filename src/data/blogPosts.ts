@@ -6,6 +6,7 @@ export interface ContentBlock {
   filename?: string;
   items?: string[];
   alt?: string;
+  caption?: string;
   tableHeaders?: string[];
   tableRows?: string[][];
   calloutVariant?: "note" | "tip" | "warning" | "question";

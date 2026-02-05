@@ -182,13 +182,14 @@ function parseMarkdownToBlocks(markdown: string): ContentBlock[] {
       continue;
     }
 
-    // Image
-    const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    // Image with optional caption: ![alt](url) or ![alt](url "caption")
+    const imageMatch = line.match(/^!\[([^\]]*)\]\(([^\s"]+)(?:\s+"([^"]+)")?\)$/);
     if (imageMatch) {
       blocks.push({
         type: "image",
         alt: imageMatch[1],
         content: imageMatch[2],
+        caption: imageMatch[3],
       });
       i++;
       continue;

@@ -4,11 +4,12 @@ import { cn } from "@/lib/utils";
 interface LazyImageProps {
   src: string;
   alt?: string;
+  caption?: string;
   onClick?: () => void;
   className?: string;
 }
 
-export const LazyImage = ({ src, alt, onClick, className }: LazyImageProps) => {
+export const LazyImage = ({ src, alt, caption, onClick, className }: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,13 @@ export const LazyImage = ({ src, alt, onClick, className }: LazyImageProps) => {
             isLoaded ? "opacity-100 block" : "opacity-0 absolute inset-0"
           )}
         />
+      )}
+      
+      {/* Caption */}
+      {caption && (
+        <p className="text-center text-sm text-muted-foreground mt-3 italic">
+          {caption}
+        </p>
       )}
     </div>
   );

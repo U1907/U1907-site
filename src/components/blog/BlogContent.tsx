@@ -1,7 +1,7 @@
 import { CodeBlock } from "./CodeBlock";
 import { TableOfContents, generateId } from "./TableOfContents";
 import type { BlogPost, ContentBlock } from "@/data/blogPosts";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ImagePreview } from "./ImagePreview";
 import { LazyImage } from "./LazyImage";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,14 @@ const renderInlineCode = (text: string): React.ReactNode => {
 
 export const BlogContent = ({ post }: BlogContentProps) => {
   const [previewImage, setPreviewImage] = useState<{ src: string; alt?: string } | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Scroll to top when post changes
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo(0, 0);
+    }
+  }, [post.id]);
 
   const renderContentBlock = (block: ContentBlock, index: number) => {
     switch (block.type) {
@@ -88,6 +96,7 @@ export const BlogContent = ({ post }: BlogContentProps) => {
             key={index}
             src={block.content || ""}
             alt={block.alt}
+            caption={block.caption}
             onClick={() => setPreviewImage({ src: block.content || "", alt: block.alt })}
           />
         );
@@ -97,7 +106,7 @@ export const BlogContent = ({ post }: BlogContentProps) => {
           <div key={index} className="my-6 overflow-hidden rounded-lg border border-border [&_table]:m-0">
             <table className="w-full text-[15px] border-collapse !m-0">
               <thead>
-                <tr className="bg-[#1a1a1a]">
+                <tr className="bg-muted/50">
                   {block.tableHeaders?.map((header, i) => (
                     <th
                       key={i}
@@ -115,7 +124,7 @@ export const BlogContent = ({ post }: BlogContentProps) => {
                 {block.tableRows?.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}
-                    className={rowIndex % 2 === 0 ? "bg-[#0f0f0f]" : "bg-[#1a1a1a]"}
+                    className={rowIndex % 2 === 0 ? "bg-background" : "bg-muted/30"}
                   >
                     {row.map((cell, cellIndex) => (
                       <td
@@ -153,7 +162,7 @@ export const BlogContent = ({ post }: BlogContentProps) => {
 
   return (
     <>
-      <main className="flex-1 py-8 md:py-[60px] px-4 sm:px-6 md:px-10 md:pl-12 overflow-y-auto overflow-x-hidden bg-background">
+      <main ref={mainRef} className="flex-1 py-8 md:py-[60px] px-4 sm:px-6 md:px-10 md:pl-12 overflow-y-auto overflow-x-hidden bg-background">
         <div className="w-full max-w-[1100px] mx-auto flex flex-col lg:flex-row lg:gap-12 xl:gap-16">
           <article key={post.id} className="w-full lg:max-w-[700px] blog-prose min-w-0 lg:flex-1 animate-fade-in-up">
             <h1>{post.title}</h1>
