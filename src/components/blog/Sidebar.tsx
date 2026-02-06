@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, FileText, ChevronRight, ChevronLeft, Folder, FolderOpen, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BlogPost } from "@/data/blogPosts";
@@ -16,11 +16,19 @@ interface SidebarProps {
   onSelectPost: (postId: string) => void;
   isOpen?: boolean;
   onClose?: () => void;
+  initialActiveFolder?: string | null;
 }
 
-export const Sidebar = ({ posts, activePostId, onSelectPost, isOpen = true }: SidebarProps) => {
+export const Sidebar = ({ posts, activePostId, onSelectPost, isOpen = true, initialActiveFolder }: SidebarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [activeFolder, setActiveFolder] = useState<string | null>(initialActiveFolder ?? null);
+
+  // Update activeFolder when initialActiveFolder changes
+  useEffect(() => {
+    if (initialActiveFolder !== undefined) {
+      setActiveFolder(initialActiveFolder);
+    }
+  }, [initialActiveFolder]);
 
   // Filter posts by search query
   const searchResults = useMemo(() => {

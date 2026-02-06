@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { TopBar } from "@/components/blog/TopBar";
+import { Footer } from "@/components/Footer";
 import { loadMarkdownPosts, type BlogPost } from "@/data/blogPosts";
 import { ArrowRight } from "lucide-react";
 
@@ -93,6 +94,7 @@ const HomePage = () => {
           </section>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

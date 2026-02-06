@@ -107,6 +107,7 @@ const Index = () => {
           onSelectPost={handleSelectPost}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          initialActiveFolder={activePost?.category ?? null}
         />
         {/* Overlay for mobile when sidebar is open */}
         {isMobile && sidebarOpen && (
