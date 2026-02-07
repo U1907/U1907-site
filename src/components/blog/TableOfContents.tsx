@@ -15,6 +15,7 @@ interface TableOfContentsProps {
 
 export const TableOfContents = ({ content }: TableOfContentsProps) => {
   const [activeId, setActiveId] = useState<string>("");
+  const isScrollingRef = { current: false };
 
   // Extract headings from content
   const headings: TOCItem[] = content
@@ -64,6 +65,9 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
     if (!scrollContainer) return;
 
     const handleScroll = () => {
+      // Skip scroll handling during programmatic scroll
+      if (isScrollingRef.current) return;
+
       const headingElements = headings
         .map(({ id }) => ({ id, element: document.getElementById(id) }))
         .filter((item): item is { id: string; element: HTMLElement } => item.element !== null);
@@ -98,8 +102,25 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
 
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    const scrollContainer = document.querySelector("main");
+    if (element && scrollContainer) {
+      isScrollingRef.current = true;
+      setActiveId(id);
+      
+      // Calculate target position relative to the scroll container
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetScrollTop = scrollContainer.scrollTop + elementRect.top - containerRect.top - 80;
+      
+      scrollContainer.scrollTo({
+        top: targetScrollTop,
+        behavior: "smooth",
+      });
+      
+      // Re-enable scroll handling after animation completes
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 800);
     }
   };
 

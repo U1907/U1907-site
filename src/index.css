@@ -339,11 +339,13 @@
   .blog-prose h2 {
     @apply text-2xl font-semibold tracking-tight mt-10 mb-4;
     color: hsl(var(--foreground));
+    scroll-margin-top: 100px;
   }
   
   .blog-prose h3 {
     @apply text-xl font-semibold tracking-tight mt-8 mb-3;
     color: hsl(var(--foreground));
+    scroll-margin-top: 100px;
   }
   
   .blog-prose p {
