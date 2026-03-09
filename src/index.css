@@ -155,7 +155,7 @@
 @layer components {
   .code-block {
     @apply relative rounded-lg overflow-hidden my-6;
-    background: #1a1a1a;
+    background: #181818;
     border: 1px solid hsl(var(--border));
   }
   

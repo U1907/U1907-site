@@ -1,5 +1,5 @@
 import { CodeBlock } from "./CodeBlock";
-import { TableOfContents, generateId } from "./TableOfContents";
+import { TableOfContents, generateHeadingIds } from "./TableOfContents";
 import type { BlogPost, ContentBlock } from "@/data/blogPosts";
 import { useState, useEffect, useRef } from "react";
 import { ImagePreview } from "./ImagePreview";
@@ -25,6 +25,7 @@ const renderInlineCode = (text: string): React.ReactNode => {
 export const BlogContent = ({ post }: BlogContentProps) => {
   const [previewImage, setPreviewImage] = useState<{ src: string; alt?: string } | null>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const headingIds = generateHeadingIds(post.content);
 
   // Scroll to top when post changes
   useEffect(() => {
@@ -40,7 +41,7 @@ export const BlogContent = ({ post }: BlogContentProps) => {
       
       case "heading":
         const HeadingTag = `h${block.level || 2}` as keyof JSX.IntrinsicElements;
-        const headingId = generateId(block.content || "");
+        const headingId = headingIds.get(index) || "";
         return (
           <HeadingTag key={index} id={headingId}>
             {block.content}

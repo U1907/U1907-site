@@ -17,14 +17,18 @@ export const TableOfContents = ({ content }: TableOfContentsProps) => {
   const [activeId, setActiveId] = useState<string>("");
   const isScrollingRef = { current: false };
 
-  // Extract headings from content
-  const headings: TOCItem[] = content
-    .filter((block) => block.type === "heading" && block.level && block.level <= 3)
-    .map((block) => ({
-      id: generateId(block.content || ""),
-      text: block.content || "",
-      level: block.level || 2,
-    }));
+  // Extract headings from content with unique IDs
+  const idMap = useMemo(() => generateHeadingIds(content), [content]);
+  const headings: TOCItem[] = useMemo(() => {
+    const items: TOCItem[] = [];
+    content.forEach((block, index) => {
+      const id = idMap.get(index);
+      if (id) {
+        items.push({ id, text: block.content || "", level: block.level || 2 });
+      }
+    });
+    return items;
+  }, [content, idMap]);
 
   // Group headings: h2 as parents with h3 children
   const groupedHeadings = useMemo(() => {
@@ -208,4 +212,25 @@ function generateId(text: string): string {
     .trim();
 }
 
-export { generateId };
+/**
+ * Given a list of ContentBlocks, return unique IDs for all headings
+ * in document order. Duplicate base IDs get a suffix (-1, -2, etc.)
+ */
+function generateHeadingIds(content: ContentBlock[]): Map<number, string> {
+  const ids = new Map<number, string>();
+  const seen = new Map<string, number>();
+
+  content.forEach((block, index) => {
+    if (block.type === "heading" && block.level && block.level <= 3) {
+      const base = generateId(block.content || "");
+      const count = seen.get(base) || 0;
+      const id = count === 0 ? base : `${base}-${count}`;
+      seen.set(base, count + 1);
+      ids.set(index, id);
+    }
+  });
+
+  return ids;
+}
+
+export { generateId, generateHeadingIds };

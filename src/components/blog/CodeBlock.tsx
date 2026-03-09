@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Check, Copy } from "lucide-react";
 import { codeToHtml, type BundledLanguage, bundledLanguages } from "shiki";
+import ansphereDark from "@/themes/anysphere-dark.json";
 
 interface CodeBlockProps {
   code: string;
@@ -19,8 +20,8 @@ export const CodeBlock = ({ code, language = "typescript", filename }: CodeBlock
     codeToHtml(code, {
       lang,
       themes: {
-        dark: "ayu-dark",
-        light: "ayu-dark",
+        dark: ansphereDark as any,
+        light: "github-light",
       },
       defaultColor: false,
     }).then((html) => {
